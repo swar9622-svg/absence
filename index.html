@@ -888,9 +888,10 @@
         <html lang="ar" dir="rtl">
         <head>
           <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <title>تقرير غياب - ${currentClass}</title>
           <style>
-            body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 25px; color: #1c1c1e; direction: rtl; }
+            body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 20px; color: #1c1c1e; direction: rtl; }
             .report-header { text-align: center; border-bottom: 3px solid #007AFF; padding-bottom: 12px; margin-bottom: 20px; }
             .report-header h1 { margin: 0 0 6px 0; font-size: 22px; color: #007AFF; }
             .report-info { display: flex; justify-content: space-between; font-size: 13px; font-weight: bold; margin-bottom: 15px; background: #F2F2F7; padding: 10px 14px; border-radius: 8px; }
@@ -899,12 +900,18 @@
             th { background-color: #007AFF; color: white; font-weight: bold; }
             tr:nth-child(even) { background-color: #F9F9FB; }
             .footer { margin-top: 40px; display: flex; justify-content: space-between; font-size: 13px; font-weight: bold; padding: 0 20px; }
+            .pwa-print-bar { text-align: center; margin-bottom: 15px; }
+            .btn-pwa-print { background: #007AFF; color: white; border: none; padding: 10px 24px; border-radius: 10px; font-size: 15px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(0,122,255,0.3); }
             @media print {
+              .pwa-print-bar { display: none; }
               body { padding: 0; }
             }
           </style>
         </head>
         <body>
+          <div class="pwa-print-bar">
+            <button class="btn-pwa-print" onclick="window.print()">🖨️ اضغط هنا للطباعة / حفظ PDF</button>
+          </div>
           <div class="report-header">
             <h1>التقرير الشامل للغياب والتأخر</h1>
           </div>
@@ -934,28 +941,39 @@
         </html>
       `;
 
-      let printIframe = document.getElementById('print_iframe');
-      if (!printIframe) {
-        printIframe = document.createElement('iframe');
-        printIframe.id = 'print_iframe';
-        printIframe.style.position = 'fixed';
-        printIframe.style.right = '0';
-        printIframe.style.bottom = '0';
-        printIframe.style.width = '0';
-        printIframe.style.height = '0';
-        printIframe.style.border = '0';
-        document.body.appendChild(printIframe);
+      // كشف هل يتم تشغيل التطبيق كـ PWA مثبت على آيفون
+      const isStandalone = (window.navigator.standalone === true) || (window.matchMedia('(display-mode: standalone)').matches);
+
+      if (isStandalone) {
+        // إذا كان مثبتاً على الشاشة الرئيسية، نفتح صفحة التقرير في نافذة تسمح بظاهر أمر الطباعة
+        const blob = new Blob([printDocument], { type: 'text/html;charset=utf-8' });
+        const blobUrl = URL.createObjectURL(blob);
+        window.open(blobUrl, '_blank');
+      } else {
+        // إذا كان يعمل داخل متصفح Safari العادي
+        let printIframe = document.getElementById('print_iframe');
+        if (!printIframe) {
+          printIframe = document.createElement('iframe');
+          printIframe.id = 'print_iframe';
+          printIframe.style.position = 'fixed';
+          printIframe.style.right = '0';
+          printIframe.style.bottom = '0';
+          printIframe.style.width = '0';
+          printIframe.style.height = '0';
+          printIframe.style.border = '0';
+          document.body.appendChild(printIframe);
+        }
+
+        const frameDoc = printIframe.contentWindow.document;
+        frameDoc.open();
+        frameDoc.write(printDocument);
+        frameDoc.close();
+
+        setTimeout(() => {
+          printIframe.contentWindow.focus();
+          printIframe.contentWindow.print();
+        }, 400);
       }
-
-      const frameDoc = printIframe.contentWindow.document;
-      frameDoc.open();
-      frameDoc.write(printDocument);
-      frameDoc.close();
-
-      setTimeout(() => {
-        printIframe.contentWindow.focus();
-        printIframe.contentWindow.print();
-      }, 400);
     }
 
     async function downloadFile(content, fileName, mimeType) {
