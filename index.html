@@ -12,7 +12,10 @@
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#007AFF">
 
-  <title>كشف الغياب </title>
+  <!-- مكتبة تحويل HTML إلى PDF مباشرة -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+  <title>كشف الغياب</title>
   <style>
     :root {
       --bg-color: #F2F2F7;
@@ -463,13 +466,13 @@
       </div>
       <div id="reportContent"></div>
       <div style="margin-top: 14px;">
-        <button class="btn-menu-option" style="background-color: var(--accent);" onclick="printReportPDF()">🖨️ طباعة / تصدير PDF</button>
+        <button id="pdfExportBtn" class="btn-menu-option" style="background-color: var(--accent);" onclick="generatePDF()">📄 تصدير ملف PDF</button>
       </div>
     </div>
   </div>
 
   <script>
-    // البيانات الافتراضية المطلوبة للتثبيت الجديد
+    // البيانات الافتراضية
     let defaultData = {
       "ثالث 1": ["أسعد", "أحمد"],
       "ثالث 2": ["عبدالملك", "عبدالله"]
@@ -849,130 +852,115 @@
       downloadFile(csv, `تقرير_شامل_${currentClass}.csv`, 'text/csv;charset=utf-8;');
     }
 
-    function printReportPDF() {
+    // ==========================================
+    //  دالة إنتاج وتصدير ملف PDF المباشرة
+    // ==========================================
+    async function generatePDF() {
       const currentClass = document.getElementById('classSelect').value;
       if (!currentClass || !appData[currentClass]) return alert("يرجى اختيار فصل أولاً!");
 
-      const classStudents = appData[currentClass];
-      let studentStats = {};
-      classStudents.forEach(st => { studentStats[st] = { absent: 0, late: 0 }; });
+      const btn = document.getElementById('pdfExportBtn');
+      const originalText = btn.innerText;
+      btn.innerText = "⏳ جاري إنشاء ملف PDF...";
+      btn.disabled = true;
 
-      for (let date in records) {
-        if (records[date] && records[date][currentClass]) {
-          const dayData = records[date][currentClass];
-          for (let st in dayData) {
-            if (studentStats[st]) {
-              if (dayData[st] === 'غائب') studentStats[st].absent++;
-              if (dayData[st] === 'متأخر') studentStats[st].late++;
+      try {
+        const classStudents = appData[currentClass];
+        let studentStats = {};
+        classStudents.forEach(st => { studentStats[st] = { absent: 0, late: 0 }; });
+
+        for (let date in records) {
+          if (records[date] && records[date][currentClass]) {
+            const dayData = records[date][currentClass];
+            for (let st in dayData) {
+              if (studentStats[st]) {
+                if (dayData[st] === 'غائب') studentStats[st].absent++;
+                if (dayData[st] === 'متأخر') studentStats[st].late++;
+              }
             }
           }
         }
-      }
 
-      const todayDate = new Date().toLocaleDateString('ar-SA');
+        const todayDate = new Date().toLocaleDateString('ar-SA');
 
-      let rowsHtml = '';
-      classStudents.forEach((st, idx) => {
-        rowsHtml += `
-          <tr>
-            <td style="width: 40px;">${idx + 1}</td>
-            <td style="text-align: right; font-weight: bold; padding-right: 12px;">${st}</td>
-            <td style="color: #FF3B30; font-weight: bold;">${studentStats[st].absent}</td>
-            <td style="color: #FF9500; font-weight: bold;">${studentStats[st].late}</td>
-          </tr>
-        `;
-      });
+        let rowsHtml = '';
+        classStudents.forEach((st, idx) => {
+          rowsHtml += `
+            <tr>
+              <td style="border:1px solid #D1D1D6; padding: 8px; text-align: center;">${idx + 1}</td>
+              <td style="border:1px solid #D1D1D6; padding: 8px 12px; text-align: right; font-weight: bold;">${st}</td>
+              <td style="border:1px solid #D1D1D6; padding: 8px; text-align: center; color: #FF3B30; font-weight: bold;">${studentStats[st].absent}</td>
+              <td style="border:1px solid #D1D1D6; padding: 8px; text-align: center; color: #FF9500; font-weight: bold;">${studentStats[st].late}</td>
+            </tr>
+          `;
+        });
 
-      const printDocument = `
-        <!DOCTYPE html>
-        <html lang="ar" dir="rtl">
-        <head>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>تقرير غياب - ${currentClass}</title>
-          <style>
-            body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 20px; color: #1c1c1e; direction: rtl; }
-            .report-header { text-align: center; border-bottom: 3px solid #007AFF; padding-bottom: 12px; margin-bottom: 20px; }
-            .report-header h1 { margin: 0 0 6px 0; font-size: 22px; color: #007AFF; }
-            .report-info { display: flex; justify-content: space-between; font-size: 13px; font-weight: bold; margin-bottom: 15px; background: #F2F2F7; padding: 10px 14px; border-radius: 8px; }
-            table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-            th, td { border: 1px solid #D1D1D6; padding: 8px 6px; text-align: center; font-size: 13px; }
-            th { background-color: #007AFF; color: white; font-weight: bold; }
-            tr:nth-child(even) { background-color: #F9F9FB; }
-            .footer { margin-top: 40px; display: flex; justify-content: space-between; font-size: 13px; font-weight: bold; padding: 0 20px; }
-            .pwa-print-bar { text-align: center; margin-bottom: 15px; }
-            .btn-pwa-print { background: #007AFF; color: white; border: none; padding: 10px 24px; border-radius: 10px; font-size: 15px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(0,122,255,0.3); }
-            @media print {
-              .pwa-print-bar { display: none; }
-              body { padding: 0; }
-            }
-          </style>
-        </head>
-        <body>
-          <div class="pwa-print-bar">
-            <button class="btn-pwa-print" onclick="window.print()">🖨️ اضغط هنا للطباعة / حفظ PDF</button>
+        // إنشاء عنصر HTML مؤقت لبناء التقرير
+        const element = document.createElement('div');
+        element.style.padding = '20px';
+        element.style.direction = 'rtl';
+        element.style.fontFamily = '-apple-system, BlinkMacSystemFont, Roboto, sans-serif';
+        element.style.backgroundColor = '#ffffff';
+
+        element.innerHTML = `
+          <div style="text-align: center; border-bottom: 3px solid #007AFF; padding-bottom: 12px; margin-bottom: 20px;">
+            <h1 style="margin: 0 0 6px 0; font-size: 22px; color: #007AFF;">التقرير الشامل للغياب والتأخر</h1>
           </div>
-          <div class="report-header">
-            <h1>التقرير الشامل للغياب والتأخر</h1>
-          </div>
-          <div class="report-info">
+          <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: bold; margin-bottom: 15px; background: #F2F2F7; padding: 10px 14px; border-radius: 8px;">
             <span>الفصل: ${currentClass}</span>
             <span>تاريخ التقرير: ${todayDate}</span>
             <span>إجمالي الطلاب: ${classStudents.length}</span>
           </div>
-          <table>
+          <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
             <thead>
-              <tr>
-                <th>#</th>
-                <th style="text-align: right; padding-right: 12px;">اسم الطالب</th>
-                <th style="width: 90px;">أيام الغياب</th>
-                <th style="width: 90px;">أيام التأخر</th>
+              <tr style="background-color: #007AFF; color: white;">
+                <th style="border: 1px solid #007AFF; padding: 8px; width: 40px; text-align: center;">#</th>
+                <th style="border: 1px solid #007AFF; padding: 8px 12px; text-align: right;">اسم الطالب</th>
+                <th style="border: 1px solid #007AFF; padding: 8px; width: 90px; text-align: center;">أيام الغياب</th>
+                <th style="border: 1px solid #007AFF; padding: 8px; width: 90px; text-align: center;">أيام التأخر</th>
               </tr>
             </thead>
             <tbody>
               ${rowsHtml}
             </tbody>
           </table>
-          <div class="footer">
+          <div style="margin-top: 40px; display: flex; justify-content: space-between; font-size: 13px; font-weight: bold; padding: 0 20px;">
             <div>توقيع المعلم: ....................</div>
             <div>اعتماد إدارة المدرسة: ....................</div>
           </div>
-        </body>
-        </html>
-      `;
+        `;
 
-      // كشف هل يتم تشغيل التطبيق كـ PWA مثبت على آيفون
-      const isStandalone = (window.navigator.standalone === true) || (window.matchMedia('(display-mode: standalone)').matches);
+        const filename = `تقرير_غياب_${currentClass}.pdf`;
 
-      if (isStandalone) {
-        // إذا كان مثبتاً على الشاشة الرئيسية، نفتح صفحة التقرير في نافذة تسمح بظاهر أمر الطباعة
-        const blob = new Blob([printDocument], { type: 'text/html;charset=utf-8' });
-        const blobUrl = URL.createObjectURL(blob);
-        window.open(blobUrl, '_blank');
-      } else {
-        // إذا كان يعمل داخل متصفح Safari العادي
-        let printIframe = document.getElementById('print_iframe');
-        if (!printIframe) {
-          printIframe = document.createElement('iframe');
-          printIframe.id = 'print_iframe';
-          printIframe.style.position = 'fixed';
-          printIframe.style.right = '0';
-          printIframe.style.bottom = '0';
-          printIframe.style.width = '0';
-          printIframe.style.height = '0';
-          printIframe.style.border = '0';
-          document.body.appendChild(printIframe);
+        const opt = {
+          margin:       10,
+          filename:     filename,
+          image:        { type: 'jpeg', quality: 0.98 },
+          html2canvas:  { scale: 2, useCORS: true },
+          jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+
+        const pdfWorker = html2pdf().set(opt).from(element);
+        const pdfBlob = await pdfWorker.output('blob');
+        const pdfFile = new File([pdfBlob], filename, { type: 'application/pdf' });
+
+        // تفعيل واجهة المشاركة المباشرة في جهاز الآيفون (لحفظ الملف في "الملفات" أو مشاركته)
+        if (navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
+          await navigator.share({
+            files: [pdfFile],
+            title: filename,
+            text: `تقرير الغياب والتأخر - ${currentClass}`
+          });
+        } else {
+          // تنزيل مباشر للملف في حال عدم دعم Share API
+          pdfWorker.save();
         }
-
-        const frameDoc = printIframe.contentWindow.document;
-        frameDoc.open();
-        frameDoc.write(printDocument);
-        frameDoc.close();
-
-        setTimeout(() => {
-          printIframe.contentWindow.focus();
-          printIframe.contentWindow.print();
-        }, 400);
+      } catch (err) {
+        console.error(err);
+        alert("حدث خطأ أثناء استخراج ملف PDF");
+      } finally {
+        btn.innerText = originalText;
+        btn.disabled = false;
       }
     }
 
