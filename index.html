@@ -187,40 +187,47 @@
       z-index: 100;
       align-items: center;
       justify-content: center;
-      padding: 16px;
+      padding: 12px;
     }
 
     .modal-content {
       background: white;
-      border-radius: 20px;
-      padding: 16px;
-      width: 100%;
-      max-width: 500px;
-      max-height: 90vh;
+      border-radius: 24px;
+      padding: 14px 12px;
+      width: 92%;
+      max-width: 380px;
+      max-height: 96vh;
       overflow-y: auto;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
     }
 
-    .modal-title { font-size: 17px; font-weight: 800; text-align: center; margin-bottom: 14px; }
+    .modal-title { font-size: 17px; font-weight: 900; text-align: center; }
 
     .violations-list-container {
       display: flex;
       flex-direction: column;
-      gap: 8px;
-      margin-bottom: 16px;
+      gap: 5px; 
+      margin-top: 8px;
+      margin-bottom: 10px;
+      width: 100%;
     }
 
     .violation-item {
       display: flex;
       align-items: center;
-      padding: 10px 12px;
-      border-radius: 10px;
+      justify-content: flex-start;
+      gap: 10px;
+      flex-direction: row;
+      padding: 7px 12px;
+      border-radius: 14px;
       background: #F9F9FB;
-      border: 1px solid #E5E5EA;
+      border: 1.5px solid #E5E5EA;
       cursor: pointer;
-      font-size: 13px;
-      font-weight: 700;
+      font-size: 13.5px;
+      font-weight: 800;
       color: var(--text-primary);
       transition: background 0.2s;
+      width: 100%;
     }
 
     .violation-item.selected {
@@ -230,10 +237,12 @@
     }
 
     .violation-checkbox {
-      margin-left: 10px;
-      width: 18px;
-      height: 18px;
+      width: 19px;
+      height: 19px;
       accent-color: var(--purple);
+      border-radius: 4px;
+      cursor: pointer;
+      flex-shrink: 0;
     }
 
     .btn-done-full {
@@ -241,9 +250,9 @@
       background-color: var(--purple);
       color: white;
       border: none;
-      padding: 12px;
-      border-radius: 12px;
-      font-weight: 800;
+      padding: 11px;
+      border-radius: 14px;
+      font-weight: 900;
       font-size: 15px;
       cursor: pointer;
     }
@@ -316,8 +325,8 @@
     .badge-violation { background-color: #F3E5F5; color: var(--purple); }
 
     .btn-close-circle {
-      width: 32px; height: 32px; border-radius: 50%; background: #E5E5EA; color: #8E8E93;
-      border: none; font-size: 16px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center;
+      width: 30px; height: 30px; border-radius: 50%; background: #E5E5EA; color: #8E8E93;
+      border: none; font-size: 15px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center;
     }
 
     .data-box-section { background: #F2F2F7; border-radius: 12px; padding: 12px; margin-bottom: 14px; }
@@ -384,7 +393,7 @@
   <!-- نافذة المخالفات -->
   <div class="modal" id="violationModal">
     <div class="modal-content">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
         <div class="modal-title" id="violationModalTitle" style="margin:0;">تسجيل مخالفة</div>
         <button class="btn-close-circle" onclick="closeViolationModal()">✕</button>
       </div>
@@ -481,14 +490,14 @@
       "النوم اثناء الشرح",
       "الحديث أثناء الشرح",
       "الاكل اثناء الشرح",
-	"عدم أداء الواجب",
-	      "عدم احضار اللوازم المدرسية",
+      "عدم أداء الواجب",
+      "عدم احضار اللوازم الدراسية",
       "العبث بممتلكات الفصل",
       "إثارة الفوضى",
       "التنمر أو الإساءة للآخرين",
       "الخروج من المقعد دون إذن",
       "إحضار أدوات غير مسموح بها",
-      "رمي النفايات",
+      "رمي النفايات"
     ];
 
     let defaultData = {
@@ -795,8 +804,6 @@
       closeConfirmModal();
     }
 
-    // ---------- إدارة التقارير ----------
-
     function openReportModal() {
       const currentClass = document.getElementById('classSelect').value;
       document.getElementById('reportModalTitle').innerText = `📈 التقارير - ${currentClass}`;
@@ -821,7 +828,6 @@
       }
     }
 
-    // 1. التقرير الشامل
     function renderSummaryReport() {
       const currentClass = document.getElementById('classSelect').value;
       const reportContainer = document.getElementById('reportContent');
@@ -883,7 +889,6 @@
       reportContainer.innerHTML = html;
     }
 
-    // 2. التقرير التفصيلي للمخالفات
     function renderViolationsReport() {
       const currentClass = document.getElementById('classSelect').value;
       const reportContainer = document.getElementById('reportContent');
@@ -1084,7 +1089,6 @@
       downloadFile(csv, `تقرير_إحصائي_${currentClass}.csv`, 'text/csv;charset=utf-8;');
     }
 
-    // تصدير PDF عمودي A4 لكافة التقارير مع تحجيم خانة اسم الطالب
     async function generatePDF() {
       const currentClass = document.getElementById('classSelect').value;
       if (!currentClass || !appData[currentClass]) return alert("يرجى اختيار فصل أولاً!");
@@ -1098,7 +1102,7 @@
         const classStudents = appData[currentClass];
         const todayDate = new Date().toLocaleDateString('ar-SA');
         const element = document.createElement('div');
-        element.style.padding = '4px';
+        element.style.padding = '8px';
         element.style.direction = 'rtl';
         element.style.fontFamily = '-apple-system, BlinkMacSystemFont, Roboto, sans-serif';
         element.style.backgroundColor = '#ffffff';
@@ -1128,22 +1132,22 @@
 
           tableHeaderHtml = `
             <tr style="background-color: #007AFF; color: white; font-size: 11px;">
-              <th style="border: 1px solid #007AFF; padding: 6px; width: 25px; text-align: center;">#</th>
-              <th style="border: 1px solid #007AFF; padding: 6px; text-align: right; width: 140px;">اسم الطالب</th>
-              <th style="border: 1px solid #007AFF; padding: 6px; width: 60px; text-align: center;">أيام الغياب</th>
-              <th style="border: 1px solid #007AFF; padding: 6px; width: 60px; text-align: center;">أيام التأخر</th>
-              <th style="border: 1px solid #007AFF; padding: 6px; width: 60px; text-align: center;">مخالفات</th>
+              <th style="border: 1px solid #007AFF; padding: 6px; width: 30px; text-align: center;">#</th>
+              <th style="border: 1px solid #007AFF; padding: 6px 10px; text-align: right; width: 55%;">اسم الطالب</th>
+              <th style="border: 1px solid #007AFF; padding: 6px; width: 15%; text-align: center;">الغياب</th>
+              <th style="border: 1px solid #007AFF; padding: 6px; width: 15%; text-align: center;">التأخر</th>
+              <th style="border: 1px solid #007AFF; padding: 6px; width: 15%; text-align: center;">مخالفات</th>
             </tr>
           `;
 
           classStudents.forEach((st, idx) => {
             tableRowsHtml += `
-              <tr style="font-size: 11px;">
-                <td style="border:1px solid #D1D1D6; padding: 5px; text-align: center;">${idx + 1}</td>
-                <td style="border:1px solid #D1D1D6; padding: 5px 8px; text-align: right; font-weight: bold;">${st}</td>
-                <td style="border:1px solid #D1D1D6; padding: 5px; text-align: center; color: #FF3B30; font-weight: bold;">${studentStats[st].absent}</td>
-                <td style="border:1px solid #D1D1D6; padding: 5px; text-align: center; color: #FF9500; font-weight: bold;">${studentStats[st].late}</td>
-                <td style="border:1px solid #D1D1D6; padding: 5px; text-align: center; color: #AF52DE; font-weight: bold;">${studentStats[st].violations}</td>
+              <tr style="font-size: 12px;">
+                <td style="border:1px solid #D1D1D6; padding: 6px; text-align: center; color: #8E8E93; font-weight: bold;">${idx + 1}</td>
+                <td style="border:1px solid #D1D1D6; padding: 6px 10px; text-align: right; font-weight: bold; color: #1C1C1E;">${st}</td>
+                <td style="border:1px solid #D1D1D6; padding: 6px; text-align: center; color: #FF3B30; font-weight: 900; font-size: 14px;">${studentStats[st].absent}</td>
+                <td style="border:1px solid #D1D1D6; padding: 6px; text-align: center; color: #FF9500; font-weight: 900; font-size: 14px;">${studentStats[st].late}</td>
+                <td style="border:1px solid #D1D1D6; padding: 6px; text-align: center; color: #AF52DE; font-weight: 900; font-size: 14px;">${studentStats[st].violations}</td>
               </tr>
             `;
           });
@@ -1171,54 +1175,53 @@
             }
           }
 
-          // تم تحديد width: 75px لخانة اسم الطالب لتقليصها ومنع تمددها
           tableHeaderHtml = `
             <tr style="background-color: #007AFF; color: white; font-size: 8px;">
-              <th style="border: 1px solid #007AFF; padding: 3px 1px; width: 14px; text-align: center;">#</th>
-              <th style="border: 1px solid #007AFF; padding: 3px 4px; text-align: right; width: 75px; max-width: 75px; word-break: break-word;">اسم الطالب</th>
+              <th style="border: 1px solid #007AFF; padding: 4px 2px; width: 16px; text-align: center;">#</th>
+              <th style="border: 1px solid #007AFF; padding: 4px 6px; text-align: right; width: 85px; max-width: 85px; word-break: break-word;">اسم الطالب</th>
           `;
 
           VIOLATIONS_LIST.forEach(vText => {
             const wordByWord = vText.split(' ').join('<br>');
             tableHeaderHtml += `
-              <th style="border: 1px solid #007AFF; padding: 3px 1px; text-align: center; vertical-align: middle; font-weight: bold; line-height: 1.1; width: 23px;">
+              <th style="border: 1px solid #007AFF; padding: 4px 2px; text-align: center; vertical-align: middle; font-weight: bold; line-height: 1.1; width: 25px;">
                 ${wordByWord}
               </th>
             `;
           });
 
           tableHeaderHtml += `
-              <th style="border: 1px solid #007AFF; padding: 3px 1px; width: 20px; text-align: center; background-color: #6A1B9A;">الإجمالي</th>
+              <th style="border: 1px solid #007AFF; padding: 4px 2px; width: 25px; text-align: center; background-color: #6A1B9A;">الإجمالي</th>
             </tr>
           `;
 
           classStudents.forEach((st, idx) => {
             let totalStVio = 0;
             tableRowsHtml += `
-              <tr style="font-size: 8px;">
-                <td style="border:1px solid #D1D1D6; padding: 2px 1px; text-align: center;">${idx + 1}</td>
-                <td style="border:1px solid #D1D1D6; padding: 2px 4px; text-align: right; font-weight: bold; width: 75px; max-width: 75px; line-height: 1.2; word-break: break-word;">${st}</td>
+              <tr style="font-size: 9px;">
+                <td style="border:1px solid #D1D1D6; padding: 4px 2px; text-align: center; color: #8E8E93; font-weight: bold;">${idx + 1}</td>
+                <td style="border:1px solid #D1D1D6; padding: 4px 6px; text-align: right; font-weight: bold; color: #1C1C1E; width: 85px; max-width: 85px; line-height: 1.2; word-break: break-word;">${st}</td>
             `;
 
             VIOLATIONS_LIST.forEach(vText => {
               const cnt = studentVioCounts[st][vText] || 0;
               totalStVio += cnt;
-              const displayVal = cnt > 0 ? `<b style="color:#AF52DE;">${cnt}</b>` : '-';
-              tableRowsHtml += `<td style="border:1px solid #D1D1D6; padding: 2px 1px; text-align: center;">${displayVal}</td>`;
+              const displayVal = cnt > 0 ? `<b style="color:#AF52DE; font-size: 11px; font-weight: 900;">${cnt}</b>` : '<span style="color:#D1D1D6;">-</span>';
+              tableRowsHtml += `<td style="border:1px solid #D1D1D6; padding: 4px 2px; text-align: center;">${displayVal}</td>`;
             });
 
             tableRowsHtml += `
-                <td style="border:1px solid #D1D1D6; padding: 2px 1px; text-align: center; color: #AF52DE; font-weight: bold;">${totalStVio}</td>
+                <td style="border:1px solid #D1D1D6; padding: 4px 2px; text-align: center; color: #AF52DE; font-weight: 900; font-size: 11px;">${totalStVio}</td>
               </tr>
             `;
           });
         }
 
         element.innerHTML = `
-          <div style="text-align: center; border-bottom: 2px solid #007AFF; padding-bottom: 3px; margin-bottom: 5px;">
-            <h1 style="margin: 0; font-size: 13px; color: #007AFF;">${reportTitleText}</h1>
+          <div style="text-align: center; border-bottom: 2px solid #007AFF; padding-bottom: 6px; margin-bottom: 8px;">
+            <h1 style="margin: 0; font-size: 15px; color: #007AFF; font-weight: 900;">${reportTitleText}</h1>
           </div>
-          <div style="display: flex; justify-content: space-between; font-size: 8.5px; font-weight: bold; margin-bottom: 5px; background: #F2F2F7; padding: 3px 6px; border-radius: 4px;">
+          <div style="display: flex; justify-content: space-between; font-size: 10px; font-weight: 800; margin-bottom: 8px; background: #F2F2F7; padding: 5px 10px; border-radius: 6px; color: #3A3A3C;">
             <span>الفصل: ${currentClass}</span>
             <span>تاريخ التقرير: ${todayDate}</span>
             <span>إجمالي الطلاب: ${classStudents.length}</span>
@@ -1231,17 +1234,16 @@
               ${tableRowsHtml}
             </tbody>
           </table>
-          <div style="margin-top: 10px; display: flex; justify-content: space-between; font-size: 8px; font-weight: bold; padding: 0 5px;">
-            <div>توقيع المعلم: ....................</div>
-            <div>اعتماد إدارة المدرسة: ....................</div>
+          <div style="margin-top: 14px; display: flex; justify-content: space-between; font-size: 9px; font-weight: 800; padding: 0 10px; color: #3A3A3C;">
+            <div>توقيع المعلم: ........................................</div>
+            <div>اعتماد إدارة المدرسة: ........................................</div>
           </div>
         `;
 
         const filename = `تقرير_${currentReportTab === 'summary' ? 'شامل' : 'المخالفات'}_${currentClass}.pdf`;
         
-        // تم الضبط على portrait (عمودي) لكافة التقارير
         const opt = {
-          margin: 4,
+          margin: 6,
           filename: filename,
           image: { type: 'jpeg', quality: 0.98 },
           html2canvas: { scale: 2, useCORS: true },
