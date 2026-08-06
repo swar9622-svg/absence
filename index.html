@@ -401,8 +401,8 @@
         <div class="data-box-title">🔄 النسخ الاحتياطي الشامل (لكل البيانات)</div>
         <button class="btn-menu-option" style="background-color: var(--green);" onclick="exportFullBackupJSON()">💾 تصدير نسخة احتياطية (JSON)</button>
         <button class="btn-menu-option" style="background-color: var(--accent);" onclick="triggerFileInput()">📥 استعادة من ملف نسخة احتياطية (JSON)</button>
-        <!-- اختيار ملف مباشر يتيح لك التصفح الكامل داخل مجلدات الآيفون -->
-        <input type="file" id="jsonFileInput" accept=".json,application/json,text/plain,*/*" style="display: none;" onchange="importFullBackupJSON(event)">
+        <!-- التعديل هنا: حصر الامتداد على .json فقط لفتح تطبيق الملفات مباشرة -->
+        <input type="file" id="jsonFileInput" accept=".json" style="display: none;" onchange="importFullBackupJSON(event)">
       </div>
 
       <div class="data-box-section">
@@ -739,7 +739,7 @@
       document.getElementById('dataMenuModal').style.display = 'none';
     }
 
-    // 1. تصدير ملف الباك أب الشامل (JSON)
+    // تصدير ملف الباك أب الشامل (JSON)
     function exportFullBackupJSON() {
       const backupObj = {
         appData: appData,
@@ -752,14 +752,14 @@
       downloadFile(jsonStr, `نسخة_احتياطية_الغياب_${dateStr}.json`, 'application/json');
     }
 
-    // فتح نافذة اختيار الملفات بالجهاز
+    // فتح متصفح الملفات مباشرة
     function triggerFileInput() {
       const fileInput = document.getElementById('jsonFileInput');
-      fileInput.value = ''; // إعطاء إمكانية إعادة التحديد
+      fileInput.value = '';
       fileInput.click();
     }
 
-    // 2. استعادة طبيعية ومباشرة لقراءة ملف الـ JSON المختار من المجلدات
+    // استعادة البيانات مباشرة عند اختيار الملف
     function importFullBackupJSON(event) {
       const file = event.target.files[0];
       if (!file) return;
@@ -790,7 +790,7 @@
       reader.readAsText(file, 'UTF-8');
     }
 
-    // 3. تصدير سجلات الغياب والتأخر للفصل المحدد فقط (CSV)
+    // تصدير سجلات الغياب والتأخر للفصل المحدد فقط (CSV)
     function exportClassRecordsCSV() {
       const currentClass = document.getElementById('classSelect').value;
       if (!currentClass) return alert("يرجى اختيار فصل أولاً!");
@@ -817,7 +817,7 @@
       downloadFile(csv, `سجل_غياب_${currentClass}.csv`, 'text/csv;charset=utf-8;');
     }
 
-    // 4. تصدير التقرير الإحصائي الإجمالي لجميع طلاب الفصل المحدد (CSV)
+    // تصدير التقرير الإحصائي الإجمالي لجميع طلاب الفصل المحدد (CSV)
     function exportClassSummaryCSV() {
       const currentClass = document.getElementById('classSelect').value;
       if (!currentClass || !appData[currentClass]) return alert("يرجى اختيار فصل أولاً!");
@@ -849,7 +849,7 @@
       downloadFile(csv, `تقرير_شامل_${currentClass}.csv`, 'text/csv;charset=utf-8;');
     }
 
-    // 5. طباعة وتصدير تقرير PDF احترافي ومنسق
+    // طباعة وتصدير تقرير PDF احترافي ومنسق
     function printReportPDF() {
       const currentClass = document.getElementById('classSelect').value;
       if (!currentClass || !appData[currentClass]) return alert("يرجى اختيار فصل أولاً!");
