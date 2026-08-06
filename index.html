@@ -6,7 +6,12 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="كشف الغياب والتأخر">
+  
+  <!-- إعدادات الأيقونة والتثبيت PWA -->
   <link rel="apple-touch-icon" href="icon.png">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#007AFF">
+
   <title>كشف الغياب والتأخر</title>
   <style>
     :root {
@@ -401,7 +406,6 @@
         <div class="data-box-title">🔄 النسخ الاحتياطي الشامل (لكل البيانات)</div>
         <button class="btn-menu-option" style="background-color: var(--green);" onclick="exportFullBackupJSON()">💾 تصدير نسخة احتياطية (JSON)</button>
         <button class="btn-menu-option" style="background-color: var(--accent);" onclick="triggerFileInput()">📥 استعادة من ملف نسخة احتياطية (JSON)</button>
-        <!-- التعديل هنا: حصر الامتداد على .json فقط لفتح تطبيق الملفات مباشرة -->
         <input type="file" id="jsonFileInput" accept=".json" style="display: none;" onchange="importFullBackupJSON(event)">
       </div>
 
@@ -426,7 +430,7 @@
       </div>
 
       <div class="inline-add-box" id="inlineAddBox">
-        <input type="text" id="newClassInput" placeholder="اسم الفصل الجديد (مثال: أول/2)...">
+        <input type="text" id="newClassInput" placeholder="اسم الفصل الجديد (مثال: ثالث 3)...">
         <button class="btn-confirm-add" onclick="saveNewClass()">حفظ</button>
       </div>
 
@@ -465,9 +469,10 @@
   </div>
 
   <script>
+    // البيانات الافتراضية المطلوبة للتثبيت الجديد
     let defaultData = {
-      "فصل 1/1": ["اسعد", "احمد"],
-      "فصل 1/2": ["عبدالملك", "عبدالله"]
+      "ثالث 1": ["أسعد", "أحمد"],
+      "ثالث 2": ["عبدالملك", "عبدالله"]
     };
 
     let appData = JSON.parse(localStorage.getItem('attendance_app_data')) || defaultData;
@@ -739,7 +744,6 @@
       document.getElementById('dataMenuModal').style.display = 'none';
     }
 
-    // تصدير ملف الباك أب الشامل (JSON)
     function exportFullBackupJSON() {
       const backupObj = {
         appData: appData,
@@ -752,14 +756,12 @@
       downloadFile(jsonStr, `نسخة_احتياطية_الغياب_${dateStr}.json`, 'application/json');
     }
 
-    // فتح متصفح الملفات مباشرة
     function triggerFileInput() {
       const fileInput = document.getElementById('jsonFileInput');
       fileInput.value = '';
       fileInput.click();
     }
 
-    // استعادة البيانات مباشرة عند اختيار الملف
     function importFullBackupJSON(event) {
       const file = event.target.files[0];
       if (!file) return;
@@ -769,7 +771,7 @@
         try {
           const parsed = JSON.parse(e.target.result);
           
-          let importedAppData = parsed.appData || (parsed["فصل 1/1"] ? parsed : null);
+          let importedAppData = parsed.appData || (parsed["ثالث 1"] ? parsed : null);
           let importedRecords = parsed.records || {};
 
           if (importedAppData) {
@@ -790,7 +792,6 @@
       reader.readAsText(file, 'UTF-8');
     }
 
-    // تصدير سجلات الغياب والتأخر للفصل المحدد فقط (CSV)
     function exportClassRecordsCSV() {
       const currentClass = document.getElementById('classSelect').value;
       if (!currentClass) return alert("يرجى اختيار فصل أولاً!");
@@ -817,7 +818,6 @@
       downloadFile(csv, `سجل_غياب_${currentClass}.csv`, 'text/csv;charset=utf-8;');
     }
 
-    // تصدير التقرير الإحصائي الإجمالي لجميع طلاب الفصل المحدد (CSV)
     function exportClassSummaryCSV() {
       const currentClass = document.getElementById('classSelect').value;
       if (!currentClass || !appData[currentClass]) return alert("يرجى اختيار فصل أولاً!");
@@ -849,7 +849,6 @@
       downloadFile(csv, `تقرير_شامل_${currentClass}.csv`, 'text/csv;charset=utf-8;');
     }
 
-    // طباعة وتصدير تقرير PDF احترافي ومنسق
     function printReportPDF() {
       const currentClass = document.getElementById('classSelect').value;
       if (!currentClass || !appData[currentClass]) return alert("يرجى اختيار فصل أولاً!");
@@ -959,7 +958,6 @@
       }, 400);
     }
 
-    // دالة تنزيل وتصدير الملفات
     async function downloadFile(content, fileName, mimeType) {
       const blob = new Blob([content], { type: mimeType });
       const file = new File([blob], fileName, { type: mimeType });
