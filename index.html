@@ -143,7 +143,7 @@
 
     .btn-status.active-absent { background-color: var(--red); color: #FFFFFF; }
     .btn-status.active-late { background-color: var(--yellow); color: #FFFFFF; }
-    .btn-status.active-violation { background-color: var(--purple); color: #FFFFFF; font-size: 13px; font-weight: 800; }
+    .btn-status.active-violation { background-color: var(--purple); color: #FFFFFF; font-size: 11px; font-weight: 800; }
     .btn-status.disabled-btn { opacity: 0.4; cursor: not-allowed; }
 
     .bottom-controls {
@@ -193,9 +193,9 @@
     .modal-content {
       background: white;
       border-radius: 20px;
-      padding: 20px;
+      padding: 16px;
       width: 100%;
-      max-width: 460px;
+      max-width: 500px;
       max-height: 90vh;
       overflow-y: auto;
     }
@@ -278,41 +278,39 @@
 
     .table-responsive-wrapper {
       width: 100%;
-      overflow-x: auto;
       border-radius: 10px;
       border: 1px solid #E5E5EA;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
     }
 
     .report-table { width: 100%; border-collapse: collapse; }
-    .report-table th, .report-table td { padding: 8px 6px; text-align: center; border-bottom: 1px solid #E5E5EA; border-left: 1px solid #F2F2F7; font-size: 11px; white-space: nowrap; }
-    .report-table th { color: var(--text-secondary); font-weight: 800; background: #F9F9FB; }
+    .report-table th, .report-table td { 
+      padding: 6px 4px; 
+      text-align: center; 
+      border: 1px solid #E5E5EA; 
+      font-size: 11px; 
+    }
+    .report-table th { color: #FFFFFF; font-weight: 800; background: var(--accent); }
     
-    /* جعل عامود الاسم أقصر والسماح بنزول الاسم للسطر الثاني داخل التقرير */
     .report-table td.student-name-td { 
       text-align: right; 
       font-weight: 700; 
-      color: var(--text-primary); 
-      position: sticky; 
-      right: 0; 
-      background: white; 
-      border-left: 2px solid #E5E5EA;
-      max-width: 120px;
-      min-width: 110px;
-      white-space: normal;
-      word-wrap: break-word;
-      line-height: 1.3;
+      color: var(--text-primary);
+      padding-right: 8px;
     }
-    .report-table th.student-name-th { 
-      position: sticky; 
-      right: 0; 
-      background: #F9F9FB; 
-      border-left: 2px solid #E5E5EA; 
-      z-index: 2; 
-      max-width: 120px;
-      min-width: 110px;
+
+    .th-mobile-normal {
+      min-width: 65px;
+      font-size: 10px !important;
+      line-height: 1.2;
+      vertical-align: middle;
+      padding: 6px 2px !important;
+      white-space: normal;
+      word-break: keep-all;
     }
     
-    .badge-num { display: inline-block; width: 22px; height: 22px; line-height: 22px; border-radius: 50%; font-weight: 800; font-size: 11px; }
+    .badge-num { display: inline-block; min-width: 20px; height: 20px; line-height: 20px; border-radius: 10px; font-weight: 800; font-size: 11px; padding: 0 4px; }
     .badge-absent { background-color: #FFE5E5; color: var(--red); }
     .badge-late { background-color: #FFF3D6; color: var(--yellow); }
     .badge-violation { background-color: #F3E5F5; color: var(--purple); }
@@ -404,7 +402,6 @@
         <button class="btn-close-circle" onclick="closeReportModal()">✕</button>
       </div>
 
-      <!-- خيارات التقارير (تبويبات) -->
       <div class="report-tabs">
         <button class="report-tab-btn active" id="tabSummaryBtn" onclick="switchReportTab('summary')">📋 تقرير شامل</button>
         <button class="report-tab-btn" id="tabViolationsBtn" onclick="switchReportTab('violations')">⚠️ تقرير بالمخالفات</button>
@@ -484,13 +481,14 @@
       "النوم اثناء الشرح",
       "الحديث أثناء الشرح",
       "الاكل اثناء الشرح",
+	"عدم أداء الواجب",
+	      "عدم احضار اللوازم المدرسية",
       "العبث بممتلكات الفصل",
-      "عدم أداء الواجب",
       "إثارة الفوضى",
       "التنمر أو الإساءة للآخرين",
       "الخروج من المقعد دون إذن",
-      "إحضار أدوات ممنوعة",
-      "رمي النفايات"
+      "إحضار أدوات غير مسموح بها",
+      "رمي النفايات",
     ];
 
     let defaultData = {
@@ -564,7 +562,7 @@
         if (status === 'متأخر') lateCount++;
         totalViolationsToday += vList.length;
 
-        const vBtnText = vList.length > 0 ? `${vList.length}` : 'مخالفات';
+        const vBtnText = vList.length > 0 ? `مخالفات ${vList.length}` : 'مخالفات';
         const vBtnClass = vList.length > 0 ? 'active-violation' : '';
         const disabledClass = (status === 'غائب') ? 'disabled-btn' : '';
 
@@ -797,7 +795,7 @@
       closeConfirmModal();
     }
 
-    // ---------- إدارة التقارير المزدوجة ----------
+    // ---------- إدارة التقارير ----------
 
     function openReportModal() {
       const currentClass = document.getElementById('classSelect').value;
@@ -856,21 +854,23 @@
           <table class="report-table">
             <thead>
               <tr>
-                <th class="student-name-th" style="text-align:right;">اسم الطالب</th>
-                <th>الغياب</th>
-                <th>التأخر</th>
-                <th>المخالفات</th>
+                <th style="width: 28px;">#</th>
+                <th style="text-align:right;">اسم الطالب</th>
+                <th style="width: 45px;">الغياب</th>
+                <th style="width: 45px;">التأخر</th>
+                <th style="width: 50px;">مخالفات</th>
               </tr>
             </thead>
             <tbody>
       `;
 
-      classStudents.forEach(st => {
+      classStudents.forEach((st, idx) => {
         const abs = studentStats[st].absent;
         const lat = studentStats[st].late;
         const vio = studentStats[st].violations;
         html += `
           <tr>
+            <td style="color:var(--text-secondary); font-weight:bold;">${idx + 1}</td>
             <td class="student-name-td">${st}</td>
             <td><span class="badge-num badge-absent">${abs}</span></td>
             <td><span class="badge-num badge-late">${lat}</span></td>
@@ -917,37 +917,43 @@
         }
       }
 
-      let thHeadersHtml = VIOLATIONS_LIST.map(v => `<th>${v}</th>`).join('');
-
       let html = `
         <div class="table-responsive-wrapper">
           <table class="report-table">
             <thead>
               <tr>
-                <th class="student-name-th" style="text-align:right;">اسم الطالب</th>
-                ${thHeadersHtml}
-                <th style="background:#F3E5F5; color:var(--purple);">الإجمالي</th>
+                <th style="width: 22px; padding: 4px 2px;">#</th>
+                <th style="text-align:right; min-width: 100px; padding: 4px 6px;">اسم الطالب</th>
+      `;
+
+      VIOLATIONS_LIST.forEach(vText => {
+        html += `<th class="th-mobile-normal">${vText}</th>`;
+      });
+
+      html += `
+                <th style="min-width: 45px; background-color: #6A1B9A;">الإجمالي</th>
               </tr>
             </thead>
             <tbody>
       `;
 
-      classStudents.forEach(st => {
+      classStudents.forEach((st, idx) => {
         let totalStVio = 0;
-        let vCellsHtml = '';
+        html += `
+          <tr>
+            <td style="color:var(--text-secondary); font-weight:bold; font-size:11px;">${idx + 1}</td>
+            <td class="student-name-td" style="font-size:12px; white-space:nowrap;">${st}</td>
+        `;
 
-        VIOLATIONS_LIST.forEach(vName => {
-          const cnt = studentVioCounts[st][vName];
+        VIOLATIONS_LIST.forEach(vText => {
+          const cnt = studentVioCounts[st][vText] || 0;
           totalStVio += cnt;
-          const cellColor = cnt > 0 ? 'color: var(--purple); font-weight: 800;' : 'color: #CCC;';
-          vCellsHtml += `<td style="${cellColor}">${cnt > 0 ? cnt : '-'}</td>`;
+          const displayVal = cnt > 0 ? `<b style="color:var(--purple);">${cnt}</b>` : '-';
+          html += `<td style="font-size:11px; padding:2px;">${displayVal}</td>`;
         });
 
         html += `
-          <tr>
-            <td class="student-name-td">${st}</td>
-            ${vCellsHtml}
-            <td><span class="badge-num badge-violation">${totalStVio}</span></td>
+            <td style="padding:2px;"><span class="badge-num badge-violation">${totalStVio}</span></td>
           </tr>
         `;
       });
@@ -1078,7 +1084,7 @@
       downloadFile(csv, `تقرير_إحصائي_${currentClass}.csv`, 'text/csv;charset=utf-8;');
     }
 
-    // استخراج PDF مع المحافظة على أن يكون كل اسم بداخل سطر واحد فقط
+    // تصدير PDF عمودي A4 لكافة التقارير مع تحجيم خانة اسم الطالب
     async function generatePDF() {
       const currentClass = document.getElementById('classSelect').value;
       if (!currentClass || !appData[currentClass]) return alert("يرجى اختيار فصل أولاً!");
@@ -1092,13 +1098,12 @@
         const classStudents = appData[currentClass];
         const todayDate = new Date().toLocaleDateString('ar-SA');
         const element = document.createElement('div');
-        element.style.padding = '15px';
+        element.style.padding = '4px';
         element.style.direction = 'rtl';
         element.style.fontFamily = '-apple-system, BlinkMacSystemFont, Roboto, sans-serif';
         element.style.backgroundColor = '#ffffff';
 
         let reportTitleText = currentReportTab === 'summary' ? "التقرير الشامل للغياب والتأخر والمخالفات" : "التقرير التفصيلي لسجل المخالفات السلوكية";
-        let isLandscape = (currentReportTab === 'violations');
 
         let tableHeaderHtml = '';
         let tableRowsHtml = '';
@@ -1122,23 +1127,23 @@
           }
 
           tableHeaderHtml = `
-            <tr style="background-color: #007AFF; color: white;">
-              <th style="border: 1px solid #007AFF; padding: 6px; width: 35px; text-align: center;">#</th>
-              <th style="border: 1px solid #007AFF; padding: 6px 10px; text-align: right; white-space: nowrap;">اسم الطالب</th>
-              <th style="border: 1px solid #007AFF; padding: 6px; width: 80px; text-align: center;">أيام الغياب</th>
-              <th style="border: 1px solid #007AFF; padding: 6px; width: 80px; text-align: center;">أيام التأخر</th>
-              <th style="border: 1px solid #007AFF; padding: 6px; width: 80px; text-align: center;">المخالفات</th>
+            <tr style="background-color: #007AFF; color: white; font-size: 11px;">
+              <th style="border: 1px solid #007AFF; padding: 6px; width: 25px; text-align: center;">#</th>
+              <th style="border: 1px solid #007AFF; padding: 6px; text-align: right; width: 140px;">اسم الطالب</th>
+              <th style="border: 1px solid #007AFF; padding: 6px; width: 60px; text-align: center;">أيام الغياب</th>
+              <th style="border: 1px solid #007AFF; padding: 6px; width: 60px; text-align: center;">أيام التأخر</th>
+              <th style="border: 1px solid #007AFF; padding: 6px; width: 60px; text-align: center;">مخالفات</th>
             </tr>
           `;
 
           classStudents.forEach((st, idx) => {
             tableRowsHtml += `
-              <tr>
-                <td style="border:1px solid #D1D1D6; padding: 6px; text-align: center;">${idx + 1}</td>
-                <td style="border:1px solid #D1D1D6; padding: 6px 10px; text-align: right; font-weight: bold; white-space: nowrap;">${st}</td>
-                <td style="border:1px solid #D1D1D6; padding: 6px; text-align: center; color: #FF3B30; font-weight: bold;">${studentStats[st].absent}</td>
-                <td style="border:1px solid #D1D1D6; padding: 6px; text-align: center; color: #FF9500; font-weight: bold;">${studentStats[st].late}</td>
-                <td style="border:1px solid #D1D1D6; padding: 6px; text-align: center; color: #AF52DE; font-weight: bold;">${studentStats[st].violations}</td>
+              <tr style="font-size: 11px;">
+                <td style="border:1px solid #D1D1D6; padding: 5px; text-align: center;">${idx + 1}</td>
+                <td style="border:1px solid #D1D1D6; padding: 5px 8px; text-align: right; font-weight: bold;">${st}</td>
+                <td style="border:1px solid #D1D1D6; padding: 5px; text-align: center; color: #FF3B30; font-weight: bold;">${studentStats[st].absent}</td>
+                <td style="border:1px solid #D1D1D6; padding: 5px; text-align: center; color: #FF9500; font-weight: bold;">${studentStats[st].late}</td>
+                <td style="border:1px solid #D1D1D6; padding: 5px; text-align: center; color: #AF52DE; font-weight: bold;">${studentStats[st].violations}</td>
               </tr>
             `;
           });
@@ -1157,55 +1162,68 @@
                 if (studentVioCounts[st]) {
                   const rec = getStudentDayRecord(date, currentClass, st);
                   rec.violations.forEach(vName => {
-                    if (studentVioCounts[st][vName] !== undefined) studentVioCounts[st][vName]++;
+                    if (studentVioCounts[st][vName] !== undefined) {
+                      studentVioCounts[st][vName]++;
+                    }
                   });
                 }
               }
             }
           }
 
-          let thVListHtml = VIOLATIONS_LIST.map(v => `<th style="border: 1px solid #007AFF; padding: 4px; font-size: 9px; text-align: center;">${v}</th>`).join('');
-
+          // تم تحديد width: 75px لخانة اسم الطالب لتقليصها ومنع تمددها
           tableHeaderHtml = `
-            <tr style="background-color: #007AFF; color: white;">
-              <th style="border: 1px solid #007AFF; padding: 4px; width: 25px; text-align: center; font-size: 10px;">#</th>
-              <th style="border: 1px solid #007AFF; padding: 4px 8px; text-align: right; font-size: 10px; white-space: nowrap;">اسم الطالب</th>
-              ${thVListHtml}
-              <th style="border: 1px solid #007AFF; padding: 4px; width: 45px; text-align: center; font-size: 10px; background-color: #6A1B9A;">الإجمالي</th>
+            <tr style="background-color: #007AFF; color: white; font-size: 8px;">
+              <th style="border: 1px solid #007AFF; padding: 3px 1px; width: 14px; text-align: center;">#</th>
+              <th style="border: 1px solid #007AFF; padding: 3px 4px; text-align: right; width: 75px; max-width: 75px; word-break: break-word;">اسم الطالب</th>
+          `;
+
+          VIOLATIONS_LIST.forEach(vText => {
+            const wordByWord = vText.split(' ').join('<br>');
+            tableHeaderHtml += `
+              <th style="border: 1px solid #007AFF; padding: 3px 1px; text-align: center; vertical-align: middle; font-weight: bold; line-height: 1.1; width: 23px;">
+                ${wordByWord}
+              </th>
+            `;
+          });
+
+          tableHeaderHtml += `
+              <th style="border: 1px solid #007AFF; padding: 3px 1px; width: 20px; text-align: center; background-color: #6A1B9A;">الإجمالي</th>
             </tr>
           `;
 
           classStudents.forEach((st, idx) => {
             let totalStVio = 0;
-            let vCellsHtml = '';
+            tableRowsHtml += `
+              <tr style="font-size: 8px;">
+                <td style="border:1px solid #D1D1D6; padding: 2px 1px; text-align: center;">${idx + 1}</td>
+                <td style="border:1px solid #D1D1D6; padding: 2px 4px; text-align: right; font-weight: bold; width: 75px; max-width: 75px; line-height: 1.2; word-break: break-word;">${st}</td>
+            `;
 
-            VIOLATIONS_LIST.forEach(vName => {
-              const cnt = studentVioCounts[st][vName];
+            VIOLATIONS_LIST.forEach(vText => {
+              const cnt = studentVioCounts[st][vText] || 0;
               totalStVio += cnt;
-              vCellsHtml += `<td style="border:1px solid #D1D1D6; padding: 4px; text-align: center; font-size: 9px; ${cnt > 0 ? 'color:#AF52DE; font-weight:bold;' : 'color:#CCC;'}">${cnt > 0 ? cnt : '-'}</td>`;
+              const displayVal = cnt > 0 ? `<b style="color:#AF52DE;">${cnt}</b>` : '-';
+              tableRowsHtml += `<td style="border:1px solid #D1D1D6; padding: 2px 1px; text-align: center;">${displayVal}</td>`;
             });
 
             tableRowsHtml += `
-              <tr>
-                <td style="border:1px solid #D1D1D6; padding: 4px; text-align: center; font-size: 9px;">${idx + 1}</td>
-                <td style="border:1px solid #D1D1D6; padding: 4px 8px; text-align: right; font-size: 9px; font-weight: bold; white-space: nowrap;">${st}</td>
-                ${vCellsHtml}
-                <td style="border:1px solid #D1D1D6; padding: 4px; text-align: center; font-size: 9px; color: #AF52DE; font-weight: bold;">${totalStVio}</td>
+                <td style="border:1px solid #D1D1D6; padding: 2px 1px; text-align: center; color: #AF52DE; font-weight: bold;">${totalStVio}</td>
               </tr>
             `;
           });
         }
 
         element.innerHTML = `
-          <div style="text-align: center; border-bottom: 3px solid #007AFF; padding-bottom: 8px; margin-bottom: 14px;">
-            <h1 style="margin: 0 0 4px 0; font-size: 18px; color: #007AFF;">${reportTitleText}</h1>
+          <div style="text-align: center; border-bottom: 2px solid #007AFF; padding-bottom: 3px; margin-bottom: 5px;">
+            <h1 style="margin: 0; font-size: 13px; color: #007AFF;">${reportTitleText}</h1>
           </div>
-          <div style="display: flex; justify-content: space-between; font-size: 11px; font-weight: bold; margin-bottom: 12px; background: #F2F2F7; padding: 8px 12px; border-radius: 6px;">
+          <div style="display: flex; justify-content: space-between; font-size: 8.5px; font-weight: bold; margin-bottom: 5px; background: #F2F2F7; padding: 3px 6px; border-radius: 4px;">
             <span>الفصل: ${currentClass}</span>
             <span>تاريخ التقرير: ${todayDate}</span>
             <span>إجمالي الطلاب: ${classStudents.length}</span>
           </div>
-          <table style="width: 100%; border-collapse: collapse;">
+          <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
             <thead>
               ${tableHeaderHtml}
             </thead>
@@ -1213,19 +1231,21 @@
               ${tableRowsHtml}
             </tbody>
           </table>
-          <div style="margin-top: 30px; display: flex; justify-content: space-between; font-size: 11px; font-weight: bold; padding: 0 15px;">
+          <div style="margin-top: 10px; display: flex; justify-content: space-between; font-size: 8px; font-weight: bold; padding: 0 5px;">
             <div>توقيع المعلم: ....................</div>
             <div>اعتماد إدارة المدرسة: ....................</div>
           </div>
         `;
 
         const filename = `تقرير_${currentReportTab === 'summary' ? 'شامل' : 'المخالفات'}_${currentClass}.pdf`;
+        
+        // تم الضبط على portrait (عمودي) لكافة التقارير
         const opt = {
-          margin: 8,
+          margin: 4,
           filename: filename,
           image: { type: 'jpeg', quality: 0.98 },
           html2canvas: { scale: 2, useCORS: true },
-          jsPDF: { unit: 'mm', format: 'a4', orientation: isLandscape ? 'landscape' : 'portrait' }
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
 
         const pdfWorker = html2pdf().set(opt).from(element);
