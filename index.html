@@ -11,8 +11,8 @@
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#007AFF">
 
-  <!-- مكتبة تحويل HTML إلى PDF -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <!-- مكتبة تحويل HTML إلى PDF (استدعاء محلي للعمل بدون إنترنت) -->
+  <script src="./html2pdf.bundle.min.js"></script>
 
   <title>كشف الغياب والمخالفات</title>
   <style>
@@ -360,7 +360,7 @@
 <body>
 
   <header>
-    <div class="header-title">كشف الغياب و المخالفات 1.1  </div>
+    <div class="header-title">كشف الغياب و المخالفات 1.2  </div>
     <div class="controls-bar">
       <select id="classSelect" onchange="renderStudents()"></select>
       <input type="date" id="dateSelect" onchange="renderStudents()">
